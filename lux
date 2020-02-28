@@ -6,102 +6,112 @@ BRIGHTNESS=$(cat /sys/class/backlight/intel_backlight/brightness)
 
 case $1 in
 
-  up)
-    if [[ ! -z $2 ]]; then
-      STEPS=$2
-    else
-      STEPS=1
+up)
+  if [[ ! -z $2 ]]; then
+    STEPS=$2
+  else
+    STEPS=1
+  fi
+
+  BRIGHTNESS=$((BRIGHTNESS + MAX_BRIGHTNESS / 10 * $STEPS))
+
+  if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
+    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  else
+    echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
+  fi
+  ;;
+
+down)
+  if [[ ! -z $2 ]]; then
+    STEPS=$2
+  else
+    STEPS=1
+  fi
+
+  BRIGHTNESS=$((BRIGHTNESS - MAX_BRIGHTNESS / 10 * $STEPS))
+
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n):"
+    read answer
+    if [[ $answer -eq "Y" ]]; then
+      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
     fi
+  else
+    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  fi
+  ;;
 
-    BRIGHTNESS=$((BRIGHTNESS + MAX_BRIGHTNESS / 10 * $STEPS ))
+set)
+  BRIGHTNESS=$2
 
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n):"
+    read answer
+
+    case $answer in
+    Y)
+      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      ;;
+    *)
+      exit 1
+      ;;
+    esac
+
+  else
     if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
       echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
     else
       echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
     fi
-    ;;
+  fi
+  ;;
 
-  down)
+percent)
+  BRIGHTNESS=$((MAX_BRIGHTNESS / 100 * $2))
 
-    if [[ ! -z $2 ]]; then
-      STEPS=$2
-    else
-      STEPS=1
-    fi
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n):"
+    read answer
 
-    BRIGHTNESS=$((BRIGHTNESS - MAX_BRIGHTNESS / 10 * $STEPS ))
-
-    if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-      echo -n "It will get dark in here! Continue? (Y/n):"
-      read answer
-      if [[ $answer -eq "Y" ]]; then
-        echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-      fi
-    else
+    case $answer in
+    Y)
       echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-    fi
-    ;;
+      ;;
+    *)
+      exit 1
+      ;;
+    esac
 
-  set)
-    BRIGHTNESS=$2
-    if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-      echo -n "It will get dark in here! Continue? (Y/n):"
-      read answer
-      case $answer in
-        Y)
-          echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-          ;;
-        *)
-	        exit 1
-          ;;
-      esac
+  else
+    if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
+      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
     else
-      if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
-        echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-      else
-        echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
-      fi
+      echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
     fi
-    ;;
+  fi
+  ;;
 
-  percent)
-    BRIGHTNESS=$((MAX_BRIGHTNESS / 100 * $2 ))
-    if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-      echo -n "It will get dark in here! Continue? (Y/n):"
-      read answer
-      echo $answer
-      if [[ $answer -eq "Y" ]]; then
-        echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-      else
-	      exit 1
-      fi
-    else
-      if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
-        echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-      else
-        echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
-      fi
-    fi
-    ;;
+max)
+  BRIGHTNESS=$MAX_BRIGHTNESS
 
-  max)
-    BRIGHTNESS=$MAX_BRIGHTNESS
-    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-    ;;
+  echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  ;;
 
-  low)
-    BRIGHTNESS=$((MAX_BRIGHTNESS - 8 * MAX_BRIGHTNESS / 10))
-    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-    ;;
+low)
+  BRIGHTNESS=$((MAX_BRIGHTNESS - 8 * MAX_BRIGHTNESS / 10))
 
-  info)
-    echo "Usage: $0 {down|up|set <0-$MAX_BRIGHTNESS>|percent <0-100>|max|low|info|status}"
-    ;;
+  echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  ;;
 
-  status)
-    CURRENT_PERCENT=$(( 100* $BRIGHTNESS / $MAX_BRIGHTNESS ))
-    echo "Screen is currently set to $BRIGHTNESS, or $CURRENT_PERCENT% brightness."
-    ;;
+info)
+  echo "Usage: $0 {down|up|set <0-$MAX_BRIGHTNESS>|percent <0-100>|max|low|info|status}"
+  ;;
+
+status)
+  CURRENT_PERCENT=$((100 * $BRIGHTNESS / $MAX_BRIGHTNESS))
+
+  echo "Screen is currently set to $BRIGHTNESS / $CURRENT_PERCENT% brightness."
+  ;;
 
 esac
