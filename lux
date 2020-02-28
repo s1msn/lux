@@ -32,8 +32,8 @@ down)
 
   BRIGHTNESS=$((BRIGHTNESS - MAX_BRIGHTNESS / 10 * $STEPS))
 
-  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-    echo -n "It will get dark in here! Continue? (Y/n):"
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 20)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n): "
     read answer
     if [[ $answer -eq "Y" ]]; then
       echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
@@ -46,8 +46,8 @@ down)
 set)
   BRIGHTNESS=$2
 
-  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-    echo -n "It will get dark in here! Continue? (Y/n):"
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 20)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n): "
     read answer
 
     case $answer in
@@ -71,8 +71,8 @@ set)
 percent)
   BRIGHTNESS=$((MAX_BRIGHTNESS / 100 * $2))
 
-  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
-    echo -n "It will get dark in here! Continue? (Y/n):"
+  if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 20)) ]]; then
+    echo -n "It will get dark in here! Continue? (Y/n): "
     read answer
 
     case $answer in
