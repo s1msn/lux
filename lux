@@ -48,12 +48,14 @@ case $1 in
     if [[ $BRIGHTNESS -le $((MAX_BRIGHTNESS / 40)) ]]; then
       echo -n "It will get dark in here! Continue? (Y/n):"
       read answer
-      echo $answer
-      if [[ $answer -eq "Y" ]]; then
-        echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
-      else
-	      exit 1
-      fi
+      case $answer in
+        Y)
+          echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+          ;;
+        *)
+	        exit 1
+          ;;
+      esac
     else
       if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
         echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
