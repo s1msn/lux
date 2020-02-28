@@ -1,8 +1,9 @@
 #!/bin/bash
 # control brightness of laptop screen
 
-MAX_BRIGHTNESS=$(cat /sys/class/backlight/intel_backlight/max_brightness)
-BRIGHTNESS=$(cat /sys/class/backlight/intel_backlight/brightness)
+SYSPATH="/sys/class/backlight/intel_backlight"
+MAX_BRIGHTNESS=$(cat $SYSPATH/max_brightness)
+BRIGHTNESS=$(cat "$SYSPATH/brightness")
 
 case $1 in
 
@@ -16,7 +17,7 @@ up)
   BRIGHTNESS=$((BRIGHTNESS + MAX_BRIGHTNESS / 10 * $STEPS))
 
   if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
-    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+    echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
   else
     echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
   fi
@@ -35,10 +36,10 @@ down)
     echo -n "It will get dark in here! Continue? (Y/n):"
     read answer
     if [[ $answer -eq "Y" ]]; then
-      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
     fi
   else
-    echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+    echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
   fi
   ;;
 
@@ -51,7 +52,7 @@ set)
 
     case $answer in
     Y)
-      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
       ;;
     *)
       exit 1
@@ -60,7 +61,7 @@ set)
 
   else
     if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
-      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
     else
       echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
     fi
@@ -76,7 +77,7 @@ percent)
 
     case $answer in
     Y)
-      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
       ;;
     *)
       exit 1
@@ -85,7 +86,7 @@ percent)
 
   else
     if [[ $BRIGHTNESS -le $MAX_BRIGHTNESS ]]; then
-      echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+      echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
     else
       echo "Can not exceed max brightness of $MAX_BRIGHTNESS."
     fi
@@ -95,13 +96,13 @@ percent)
 max)
   BRIGHTNESS=$MAX_BRIGHTNESS
 
-  echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
   ;;
 
 low)
   BRIGHTNESS=$((MAX_BRIGHTNESS - 8 * MAX_BRIGHTNESS / 10))
 
-  echo "$BRIGHTNESS" | sudo tee /sys/class/backlight/intel_backlight/brightness
+  echo "$BRIGHTNESS" | sudo tee "$SYSPATH/brightness"
   ;;
 
 info)
